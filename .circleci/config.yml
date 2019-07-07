@@ -1,0 +1,15 @@
+version: 2.0
+
+jobs:
+  build:
+    docker:
+      - image: openwrtorg/sdk:x86-64
+    environment:
+      - CI_PROJECT_DIR: "~/project"
+    steps:
+      - checkout
+      - run: 
+          name: build firewall3
+          command: bash -x .circleci/build.sh
+      - store_artifacts:
+          path: ~/sdk/bin/packages/x86_64/base/firewall*
