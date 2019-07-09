@@ -8,8 +8,40 @@ jobs:
       - CI_PROJECT_DIR: "~/project"
     steps:
       - checkout
-      - run: 
+      - run:
           name: build firewall3
           command: bash -x .circleci/build.sh
       - store_artifacts:
           path: ~/sdk/bin/packages/x86_64/base/firewall*
+      - persist_to_workspace:
+          root: ~/sdk/bin/packages/x86_64/base/
+          paths:
+            - firewall*
+  test:
+    docker:
+      - image: openwrtorg/rootfs:x86-64
+        command: "/sbin/init"
+    steps:
+      - run:
+          name: install ca & tar
+          command: |
+            opkg update
+            opkg install ca-certificates ca-bundle tar
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: install firewall3
+          command: |
+            opkg update
+            opkg install --force-reinstall /tmp/workspace/firewall*
+            opkg install python3-pip
+            python3 -m pip install pytest
+
+workflows:
+  version: 2
+  build-n-test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
