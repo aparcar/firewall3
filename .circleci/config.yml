@@ -23,10 +23,10 @@ jobs:
         command: "/sbin/init"
     steps:
       - run:
-          name: install ca & tar
+          name: install CI requirements
           command: |
             opkg update
-            opkg install ca-certificates ca-bundle tar
+            opkg install ca-certificates ca-bundle tar git
       - attach_workspace:
           at: /tmp/workspace
       - run:
@@ -36,6 +36,12 @@ jobs:
             opkg install --force-reinstall /tmp/workspace/firewall*
             opkg install python3-pip
             python3 -m pip install pytest
+      - checkout
+      - run:
+          name: test firewall3
+          command: |
+            ls
+            python3 -m pytest
 
 workflows:
   version: 2
